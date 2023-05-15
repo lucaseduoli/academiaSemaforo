@@ -156,7 +156,7 @@ void imprimeCineminha()
       printf("| ");
 
     /* Imprimi as cadeiras dos clientes. */
-    for (i = 0; i < N_CADEIRAS; i++)
+    for (i = N_CADEIRAS - 1; i >= 0 ; i--)
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
@@ -209,7 +209,7 @@ void imprimeCineminha()
 
     printf("| ");
 
-    for (i = 0; i < N_CADEIRAS; i++)
+    for (i = N_CADEIRAS - 1; i >= 0 ; i--)
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
@@ -273,7 +273,7 @@ void imprimeCineminha()
     else
       printf("| ");
 
-    for (i = 0; i < N_CADEIRAS; i++)
+    for (i = N_CADEIRAS - 1; i >= 0; i--)
     {
       printf(" F%02d ", i);
     }
