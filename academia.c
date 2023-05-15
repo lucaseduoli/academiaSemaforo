@@ -66,6 +66,7 @@ sem_t sem_cadeiras[N_EQUIPAMENTOS];
 sem_t sem_cad_equipamento[N_EQUIPAMENTOS];
 sem_t sem_exercicio_feito[N_EQUIPAMENTOS];
 sem_t sem_cliente_cadeira[N_EQUIPAMENTOS];
+sem_t sem_fila_mexendo[N_EQUIPAMENTOS];
 
 sem_t sem_escreve_visor[N_EQUIPAMENTOS];
 sem_t sem_le_visor[N_EQUIPAMENTOS];
@@ -156,7 +157,7 @@ void imprimeCineminha()
       printf("| ");
 
     /* Imprimi as cadeiras dos clientes. */
-    for (i = N_CADEIRAS - 1; i >= 0 ; i--)
+    for (i = N_CADEIRAS - 1; i >= 0; i--)
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
@@ -209,7 +210,7 @@ void imprimeCineminha()
 
     printf("| ");
 
-    for (i = N_CADEIRAS - 1; i >= 0 ; i--)
+    for (i = N_CADEIRAS - 1; i >= 0; i--)
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
@@ -363,6 +364,7 @@ void *f_cliente(void *v)
       estadoC[id] = W;
 
       /* Aloca uma cadeira para o cliente. */
+      sem_wait(&sem_fila_mexendo[j]);
       for (i = 0; i < N_CADEIRAS; i++)
       {
         if (estadoCadeiraCliente[j][i] == F)
@@ -376,12 +378,29 @@ void *f_cliente(void *v)
           break;
         }
       }
+      sem_post(&sem_fila_mexendo[j]);
 
       /* Imprime que o cliente esta esperando na academia. */
       imprimeCineminha();
       sem_post(&sem_estados);
 
       /* Cliente espera o visor mostrar um equipamento livre. */
+      while (minhaCadeiraCliente != 0)
+      {
+        if (estadoCadeiraCliente[j][minhaCadeiraCliente - 1] == F)
+        {
+          sem_wait(&sem_estados);
+          sem_wait(&sem_fila_mexendo[j]);
+          estadoCadeiraCliente[j][minhaCadeiraCliente] = F;
+          estadoCadeiraCliente[j][minhaCadeiraCliente - 1] = B;
+          clientesCadeira[j][minhaCadeiraCliente - 1] = id;
+          minhaCadeiraCliente--;
+          sem_post(&sem_fila_mexendo[j]);
+          imprimeCineminha();
+          sem_post(&sem_estados);
+          
+        }
+      }
       sem_wait(&sem_le_visor[j]);
       minha_cadeira = visor[j];
       /* Permite que um outro equipamento escreva no visor. */
@@ -456,6 +475,7 @@ int main()
     sem_init(&sem_cad_equipamento[i], 0, 1);
     sem_init(&sem_cliente_cadeira[i], 0, 0);
     sem_init(&sem_exercicio_feito[i], 0, 0);
+    sem_init(&sem_fila_mexendo[i], 0, 1);
 
     sem_wait(&sem_estados);
     estadoB[i] = S; // sleeping
