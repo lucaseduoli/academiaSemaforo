@@ -43,7 +43,7 @@
 
 #define N_CLIENTES 20
 #define N_EQUIPAMENTOS 3
-#define N_CADEIRAS 3
+#define N_FILAS 3
 
 /*
  * Variaveis para guardar estado dos clientes/equipamentos.
@@ -82,13 +82,13 @@ typedef enum
   F
 } estado_fila;
 
-estado_fila estadoFilaCliente[N_EQUIPAMENTOS][N_CADEIRAS];
+estado_fila estadoFilaCliente[N_EQUIPAMENTOS][N_FILAS];
 
-int clientesFila[N_EQUIPAMENTOS][N_CADEIRAS];
+int clientesFila[N_EQUIPAMENTOS][N_FILAS];
 int clientesEquipamento[N_EQUIPAMENTOS];
 
 sem_t sem_filas[N_EQUIPAMENTOS];
-sem_t sem_cad_equipamento[N_EQUIPAMENTOS];
+sem_t sem_fila_equipamento[N_EQUIPAMENTOS];
 sem_t sem_exercicio_feito[N_EQUIPAMENTOS];
 sem_t sem_cliente_fila[N_EQUIPAMENTOS];
 sem_t sem_fila_mexendo[N_EQUIPAMENTOS];
@@ -144,19 +144,19 @@ void imprimedAcademia()
 
   /* Imprime os espacos em branco da parte referente aos clientes Arrived. */
   printf("\n");
-  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
   {
     printf("     ");
   }
 
   /* Faz a conta para imprimir o tí­tulo 'ACADEMIA' no meio. */
 
-  if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+  if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
   {
     printf("     ");
   }
 
-  titulo = (4 + 6 * N_CADEIRAS +27) / 2;
+  titulo = (4 + 6 * N_FILAS +27) / 2;
 
   titulo -= 5;
 
@@ -175,7 +175,7 @@ void imprimedAcademia()
   /*****************************************************************************
    ********************** IMPRESSÃO DAS LINHAS INICIAIS DA ACADEMIA  ***********
     ****************************************************************************/
-  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -183,18 +183,18 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
       * outros momentos da academia.
       */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
   printf(" ");
-    for (i = 0; i < N_CADEIRAS; i++)
+    for (i = 0; i < N_FILAS; i++)
       {
         printf("______");
       }
       printf("__________________________\n");
 
-      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -202,12 +202,12 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
       * outros momentos da academia.
       */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
   printf("/");
-    for (i = 0; i < N_CADEIRAS; i++)
+    for (i = 0; i < N_FILAS; i++)
     {
       printf("      ");
     }
@@ -222,7 +222,7 @@ void imprimedAcademia()
     /*****************************************************************************
      ************************** IMPRESSAO PRIMEIRA LINHA DA ITERAÇÃO *************
      ****************************************************************************/
-          for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+          for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
       {
         printf("     ");
       }
@@ -230,18 +230,18 @@ void imprimedAcademia()
       /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
        * outros momentos da academia.
        */
-      if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+      if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
       {
         printf("     ");
       }
       printf("|");
-      for (i = 0; i < N_CADEIRAS; i++)
+      for (i = 0; i < N_FILAS; i++)
       {
         printf("      ");
       }
       printf("                          |\n");
 
-    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       if(k == 0 && i < qtosClientesArrived)
         printf(" ... ");
@@ -252,7 +252,7 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
@@ -260,7 +260,7 @@ void imprimedAcademia()
     printf("| ");
 
     /* Imprimi as filas dos clientes. */
-    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    for (i = N_FILAS - 1; i >= 0; i--)
     {
       if (estadoFilaCliente[k][i] == B)
       {
@@ -295,7 +295,7 @@ void imprimedAcademia()
      ************************** IMPRESSAO SEGUNDA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
-    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       if(k == 0 && i < qtosClientesArrived)
         printf(" %2d  ", clientesArrived[i]);
@@ -306,14 +306,14 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
 
     printf("| ");
 
-    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    for (i = N_FILAS - 1; i >= 0; i--)
     {
       if (estadoFilaCliente[k][i] == B)
       {
@@ -359,7 +359,7 @@ void imprimedAcademia()
      ************************* IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
-    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -367,14 +367,14 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
 
     printf("| ");
 
-    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    for (i = N_FILAS - 1; i >= 0; i--)
     {
       printf("  F%02d ", i);
     }
@@ -385,7 +385,7 @@ void imprimedAcademia()
 
 
       printf("| \n");
-      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
       {
         printf("     ");
       }
@@ -393,12 +393,12 @@ void imprimedAcademia()
       /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
        * outros momentos da academia.
        */
-      if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+      if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
       {
         printf("     ");
       }
       printf("|");
-      for (i = 0; i < N_CADEIRAS; i++)
+      for (i = 0; i < N_FILAS; i++)
       {
         printf("      ");
       }
@@ -411,7 +411,7 @@ void imprimedAcademia()
      ********************** IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO ************
      ****************************************************************************/
     for(int j = 0; j < 4; j++){
-      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -419,14 +419,14 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
     {
       printf("     ");
     }
 
     printf("| ");
 
-    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    for (i = N_FILAS - 1; i >= 0; i--)
     {
       if(estadoFilaCliente[k][i] == B)
         printf(" %s ", pessoa[j]);
@@ -449,7 +449,7 @@ void imprimedAcademia()
     /*****************************************************************************
      ********************** IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ****************
      ****************************************************************************/
-    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) - 1; i >= 0; i--)
       {
         printf("     ");
       }
@@ -457,12 +457,12 @@ void imprimedAcademia()
       /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
        * outros momentos da academia.
        */
-      if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+      if (N_CLIENTES - (N_EQUIPAMENTOS * N_FILAS) == 0)
       {
         printf("     ");
       }
     printf("\\");
-      for (i = 0; i < N_CADEIRAS; i++)
+      for (i = 0; i < N_FILAS; i++)
       {
         printf("______");
       }
@@ -528,7 +528,7 @@ void *f_cliente(void *v)
 
       /* Aloca uma fila para o cliente. */
       sem_wait(&sem_fila_mexendo[j]);
-      for (i = 0; i < N_CADEIRAS; i++)
+      for (i = 0; i < N_FILAS; i++)
       {
         if (estadoFilaCliente[j][i] == F)
         {
@@ -569,7 +569,7 @@ void *f_cliente(void *v)
       /* Permite que um outro equipamento escreva no visor. */
       sem_post(&sem_escreve_visor[j]);
       /* Espera fila do equipamento ficar livre para sentar. */
-      sem_wait(&sem_cad_equipamento[minha_fila]);
+      sem_wait(&sem_fila_equipamento[minha_fila]);
 
       sem_post(&sem_cliente_fila[minha_fila]);
 
@@ -605,7 +605,7 @@ void *f_cliente(void *v)
       /* Imprime que o cliente saiu da academia. */
       imprimedAcademia();
 
-      sem_post(&sem_cad_equipamento[minha_fila]);
+      sem_post(&sem_fila_equipamento[minha_fila]);
 
       /* Altera o estado pois o cliente vai embora. */
       sem_post(&sem_estados);
@@ -633,8 +633,8 @@ int main()
   {
     sem_init(&sem_escreve_visor[i], 0, 1);     // inicia o semáforo de escrever no visor
     sem_init(&sem_le_visor[i], 0, 0);          // inicia o semáforo de ler no visor
-    sem_init(&sem_filas[i], 0, N_CADEIRAS); // inicia o semáforo das filas
-    sem_init(&sem_cad_equipamento[i], 0, 1);
+    sem_init(&sem_filas[i], 0, N_FILAS); // inicia o semáforo das filas
+    sem_init(&sem_fila_equipamento[i], 0, 1); // inicia o sem
     sem_init(&sem_cliente_fila[i], 0, 0);
     sem_init(&sem_exercicio_feito[i], 0, 0);
     sem_init(&sem_fila_mexendo[i], 0, 1);
@@ -652,7 +652,7 @@ int main()
   }
   for (i = 0; i < N_EQUIPAMENTOS; i++)
   {
-    for (j = 0; j < N_CADEIRAS; j++)
+    for (j = 0; j < N_FILAS; j++)
     {
       sem_wait(&sem_estados);
       estadoFilaCliente[i][j] = F; // free
