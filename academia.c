@@ -498,7 +498,6 @@ void *f_equipamento(void *v)
 
   while (1)
   {
-    imprimeAcademia();
 
     sem_wait(&sem_cliente_entrou_equipamento[id]);
     
@@ -506,14 +505,12 @@ void *f_equipamento(void *v)
     /* Para o exercício nao ser imediato.*/
     sleep(1);
 
-    sem_post(&sem_equipamento_livre[id]);
+    
     sem_post(&sem_exercicio_feito[id]);
 
-    
 
     sleep(random() % 3);
     
-    imprimeAcademia();
   }
   return NULL;
 }
@@ -527,13 +524,15 @@ void *f_cliente(void *v)
 
   sem_wait(&sem_estados);
   estadoC[id] = A;
+  imprimeAcademia();
   sem_post(&sem_estados);
 
   for(int j = 0; j < N_EQUIPAMENTOS; j++){
-    if (sem_trywait(&sem_cadeira_livre[j][N_CADEIRAS - 1]) == 0)
+    if (sem_wait(&sem_cadeira_livre[j][N_CADEIRAS - 1]) == 0)
       {
         sem_wait(&sem_estados);
           estadoC[id] = W;
+          imprimeAcademia();
         sem_post(&sem_estados);
         for(int i = N_CADEIRAS-2; i >= 0; i--){
           sem_wait(&sem_cadeira_livre[j][i]);
@@ -541,9 +540,12 @@ void *f_cliente(void *v)
           estadoCadeiraCliente[j][i+1] = F;
           estadoCadeiraCliente[j][i] = B;
           clientesCadeira[j][i] = id;
+          imprimeAcademia();
           sem_post(&sem_estados);
           sem_post(&sem_cadeira_livre[j][i+1]);
         }
+
+        sleep(1);
 
         sem_wait(&sem_equipamento_livre[j]);
         sem_post(&sem_cadeira_livre[j][0]);
@@ -551,27 +553,28 @@ void *f_cliente(void *v)
         sem_wait(&sem_estados);
           estadoC[id] = FC;
           estadoB[id] = FB;
+          estadoCadeiraCliente[j][0] = F;
           clienteEquipamento[j] = id;
+          imprimeAcademia();
         sem_post(&sem_estados);
 
         sem_post(&sem_cliente_entrou_equipamento[j]);
 
 
         sem_wait(&sem_exercicio_feito[j]);
+        sem_post(&sem_equipamento_livre[j]);
 
         sem_wait(&sem_estados);
           estadoC[id] = W;
           estadoB[id] = S;
+          imprimeAcademia();
         sem_post(&sem_estados);
       }
   }
 
   sem_wait(&sem_estados);
   estadoC[id] = E;
-  sem_post(&sem_estados);
-  sleep(1);
-  sem_wait(&sem_estados);
-  estadoC[id] = L;
+  imprimeAcademia();
   sem_post(&sem_estados);
 
   return NULL;
