@@ -87,17 +87,15 @@ typedef enum
 estado_cadeira estadoCadeiraCliente[N_EQUIPAMENTOS][N_CADEIRAS];
 
 int clientesCadeira[N_EQUIPAMENTOS][N_CADEIRAS];
-int clienteEquipamento[N_EQUIPAMENTOS];
+int clientesEquipamento[N_EQUIPAMENTOS];
 
-sem_t sem_ultima_cadeira[N_EQUIPAMENTOS];
+sem_t sem_cadeiras[N_EQUIPAMENTOS];
 sem_t sem_cad_equipamento[N_EQUIPAMENTOS];
 sem_t sem_exercicio_feito[N_EQUIPAMENTOS];
 sem_t sem_cliente_cadeira[N_EQUIPAMENTOS];
-sem_t sem_equipamento_livre[N_EQUIPAMENTOS];
-sem_t sem_cadeira_livre[N_EQUIPAMENTOS][N_CADEIRAS];
 sem_t sem_fila_mexendo[N_EQUIPAMENTOS];
 
-sem_t sem_cliente_entrou_equipamento[N_EQUIPAMENTOS];
+sem_t sem_escreve_visor[N_EQUIPAMENTOS];
 sem_t sem_le_visor[N_EQUIPAMENTOS];
 
 sem_t sem_estados; /* Semaforo para troca de estados. */
@@ -348,7 +346,7 @@ void imprimeAcademia()
     switch (estadoB[k])
     {
     case FB:
-      printf("       %2d  ", clienteEquipamento[k]);
+      printf("       %2d  ", clientesEquipamento[k]);
       break;
     case S:
       printf("           ");
@@ -498,22 +496,17 @@ void *f_equipamento(void *v)
 
   while (1)
   {
-    imprimeAcademia();
-
-    sem_wait(&sem_cliente_entrou_equipamento[id]);
-    
+    sem_wait(&sem_escreve_visor[id]);
+    visor[id] = id;
+    sem_post(&sem_le_visor[id]);
 
     /* Para o exercício nao ser imediato.*/
     sleep(1);
 
-    sem_post(&sem_equipamento_livre[id]);
+    sem_wait(&sem_cliente_cadeira[id]);
     sem_post(&sem_exercicio_feito[id]);
 
-    
-
     sleep(random() % 3);
-    
-    imprimeAcademia();
   }
   return NULL;
 }
@@ -522,57 +515,121 @@ void *f_equipamento(void *v)
 void *f_cliente(void *v)
 {
   int id = *(int *)v;
+  int i, j;
+  int minha_cadeira, minhaCadeiraCliente;
 
   sleep(random() % 3);
 
   sem_wait(&sem_estados);
+  /* Cliente chegou na academia. */
   estadoC[id] = A;
+
+  /* Imprime que o cliente chegou na academia. */
+  imprimeAcademia();
   sem_post(&sem_estados);
 
-  for(int j = 0; j < N_EQUIPAMENTOS; j++){
-    if (sem_trywait(&sem_cadeira_livre[j][N_CADEIRAS - 1]) == 0)
+  while (estadoC[id] == A)
+  {
+    for (j = 0; j < N_EQUIPAMENTOS; j++)
+    {
+      if (sem_trywait(&sem_cadeiras[j]) == 0)
       {
+        /* Cliente entrou na academia e esta esperando na fila. */
         sem_wait(&sem_estados);
-          estadoC[id] = W;
-        sem_post(&sem_estados);
-        for(int i = N_CADEIRAS-2; i >= 0; i--){
-          sem_wait(&sem_cadeira_livre[j][i]);
-          sem_wait(&sem_estados);
-          estadoCadeiraCliente[j][i+1] = F;
-          estadoCadeiraCliente[j][i] = B;
-          clientesCadeira[j][i] = id;
-          sem_post(&sem_estados);
-          sem_post(&sem_cadeira_livre[j][i+1]);
+        estadoC[id] = W;
+
+        /* Aloca uma cadeira para o cliente. */
+        sem_wait(&sem_fila_mexendo[j]);
+        for (i = 0; i < N_CADEIRAS; i++)
+        {
+          if (estadoCadeiraCliente[j][i] == F)
+          {
+            estadoCadeiraCliente[j][i] = B;
+            clientesCadeira[j][i] = id;
+
+            minhaCadeiraCliente = i;
+            break;
+          }
         }
+        sem_post(&sem_fila_mexendo[j]);
 
-        sem_wait(&sem_equipamento_livre[j]);
-        sem_post(&sem_cadeira_livre[j][0]);
+        /* Imprime que o cliente esta esperando na academia. */
+        imprimeAcademia();
+        sem_post(&sem_estados);
+
+        /* Cliente espera o visor mostrar um equipamento livre. */
+        while (minhaCadeiraCliente != 0)
+        {
+          if (estadoCadeiraCliente[j][minhaCadeiraCliente - 1] == F)
+          {
+            sem_wait(&sem_fila_mexendo[j]);
+            sem_wait(&sem_estados);
+            estadoCadeiraCliente[j][minhaCadeiraCliente] = F;
+            estadoCadeiraCliente[j][minhaCadeiraCliente - 1] = B;
+            clientesCadeira[j][minhaCadeiraCliente - 1] = id;
+            minhaCadeiraCliente--;
+            imprimeAcademia();
+            sem_post(&sem_estados);
+            sem_post(&sem_fila_mexendo[j]);
+          }
+        }
+        sem_wait(&sem_le_visor[j]);
+        minha_cadeira = visor[j];
+        /* Permite que um outro equipamento escreva no visor. */
+        sem_post(&sem_escreve_visor[j]);
+        /* Espera cadeira do equipamento ficar livre para sentar. */
+        sem_wait(&sem_cad_equipamento[minha_cadeira]);
+
+        sem_post(&sem_cliente_cadeira[minha_cadeira]);
+
+        sem_wait(&sem_estados);
+
+        /* Libera a cadeira que estava sentado para um novo cliente que chegar. */
+        sem_post(&sem_cadeiras[j]);
+
+        /* Altera os estados para fazer o exercício. */
+        estadoC[id] = FC;
+        estadoB[minha_cadeira] = FB;
+
+        /* Guarda que o cliente esta na cadeira do equipamento indicada por
+         * minha_cadeira.
+         */
+        clientesEquipamento[minha_cadeira] = id;
+
+        estadoCadeiraCliente[j][minhaCadeiraCliente] = F;
+
+        /* Imprime que o cliente vai fazer o exercício. */
+        imprimeAcademia();
+        sem_post(&sem_estados);
+
+        /* Termino de alterar e imprimir a academia. */
+
+        sem_wait(&sem_exercicio_feito[minha_cadeira]);
+
+        sem_wait(&sem_estados);
+        estadoB[minha_cadeira] = S;
+        imprimeAcademia();
+
+        sem_post(&sem_cad_equipamento[minha_cadeira]);
+        sem_post(&sem_estados);
         
+      }
+    }
+      if(estadoC[id] != A){
         sem_wait(&sem_estados);
-          estadoC[id] = FC;
-          estadoB[id] = FB;
-          clienteEquipamento[j] = id;
+        /* Cliente sai da academia. */
+        estadoC[id] = E;
+        
+
+        /* Imprime que o cliente saiu da academia. */
+        imprimeAcademia();
+
+        /* Altera o estado pois o cliente vai embora. */
+        estadoC[id] = L;
         sem_post(&sem_estados);
-
-        sem_post(&sem_cliente_entrou_equipamento[j]);
-
-
-        sem_wait(&sem_exercicio_feito[j]);
-
-        sem_wait(&sem_estados);
-          estadoC[id] = W;
-          estadoB[id] = S;
-        sem_post(&sem_estados);
+        break;
       }
   }
-
-  sem_wait(&sem_estados);
-  estadoC[id] = E;
-  sem_post(&sem_estados);
-  sleep(1);
-  sem_wait(&sem_estados);
-  estadoC[id] = L;
-  sem_post(&sem_estados);
 
   return NULL;
 }
@@ -586,22 +643,18 @@ int main()
 
   for (i = 0; i < N_EQUIPAMENTOS; i++)
   {
-    sem_init(&sem_cliente_entrou_equipamento[i], 0, 0);     // inicia o semáforo de escrever no visor
-    sem_init(&sem_equipamento_livre[i], 0, 1); 
+    sem_init(&sem_escreve_visor[i], 0, 1);     // inicia o semáforo de escrever no visor
     sem_init(&sem_le_visor[i], 0, 0);          // inicia o semáforo de ler no visor
-    sem_init(&sem_ultima_cadeira[i], 0, 1); // inicia o semáforo das cadeiras
+    sem_init(&sem_cadeiras[i], 0, N_CADEIRAS); // inicia o semáforo das cadeiras
     sem_init(&sem_cad_equipamento[i], 0, 1);
     sem_init(&sem_cliente_cadeira[i], 0, 0);
     sem_init(&sem_exercicio_feito[i], 0, 0);
+    sem_init(&sem_fila_mexendo[i], 0, 1);
+
     sem_wait(&sem_estados);
     estadoB[i] = S; // sleeping
     sem_post(&sem_estados);
-    for(j = 0; j < N_CADEIRAS; j++)
-    {
-    sem_init(&sem_cadeira_livre[i][j], 0, 1);
-    }
   }
-
 
   for (i = 0; i < N_CLIENTES; i++)
   {
