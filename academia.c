@@ -1,17 +1,17 @@
 /****************************************************************************
  * File name:        academia.c
- * File description: O arquivo serve o projeto MultiThread da disciplina 
+ * File description: O arquivo serve o projeto MultiThread da disciplina
  *		     MC504 ministrada no primeiro semestre de 2023.
  *                   O intuito principal e'desenvolvimento multithread com
- *                   sincronizacao por sema'foros, contendo duas threads 
+ *                   sincronizacao por sema'foros, contendo duas threads
  *                   f_equipamento e f_cliente (cada uma com mais de uma
  *                   instancia).
  * Author name:   Giovanna Gennari
  *                Lucas Oliveira
- *                Borges   
+ *                Borges
  *                Rafael Ifanger
- * Creation date:  05/21/2023     
- * Revision date:     
+ * Creation date:  05/21/2023
+ * Revision date:
  ****************************************************************************/
 
 /****************************************************************************
@@ -41,9 +41,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define N_CLIENTES 10
+#define N_CLIENTES 20
 #define N_EQUIPAMENTOS 3
-#define N_CADEIRAS 3
+#define N_CADEIRAS 4
 
 /*
  * Variaveis para guardar estado dos clientes/equipamentos.
@@ -103,20 +103,25 @@ sem_t sem_estados; /* Semaforo para troca de estados. */
 int visor[N_EQUIPAMENTOS];
 
 char equipamentos[3][4][21] = {
-  {{"             /\\    "}, {"  __________/ /    "}, {" /__________\\/     "}, {"//         //      "},},
-  {{"   _          _    "}, {"  |_|        |_|   "}, {" _//        _//    "}, {"|_|        |_|     "}},
-  {{"                   "}, {"  ______________   "}, {" /__________\\___\\  "}, {"//         //      "}},
+    {
+        {"             /\\    "},
+        {"  __________/ /    "},
+        {" /__________\\/     "},
+        {"//         //      "},
+    },
+    {{"   _          _    "}, {"  |_|        |_|   "}, {" _//        _//    "}, {"|_|        |_|     "}},
+    {{"                   "}, {"  ______________   "}, {" /__________\\___\\  "}, {"//         //      "}},
 };
 
 char pessoa[4][5] = {
-  {"  _ "},
-  {" |_|"},
-  {" /|\\"},
-  {" / \\"},
+    {"  _ "},
+    {" |_|"},
+    {" /|\\"},
+    {" / \\"},
 };
 
 /* Funcao responsavel pela impressao da academia. */
-void imprimedAcademia()
+void imprimeAcademia()
 {
   int i, j, qtosClientesArrived = 0, qtosClientesExit = 0, titulo = 0;
 
@@ -146,19 +151,19 @@ void imprimedAcademia()
 
   /* Imprime os espacos em branco da parte referente aos clientes Arrived. */
   printf("\n");
-  for (i = 0; i < qtosClientesArrived; i++)
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
   {
     printf("     ");
   }
 
   /* Faz a conta para imprimir o tí­tulo 'ACADEMIA' no meio. */
 
-  if (qtosClientesArrived == 0)
+  if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
   {
     printf("     ");
   }
 
-  titulo = (4 + 6 * N_CADEIRAS +27) / 2;
+  titulo = (4 + 6 * N_CADEIRAS + 27) / 2;
 
   titulo -= 5;
 
@@ -173,47 +178,46 @@ void imprimedAcademia()
    ************************** FIM IMPRESSAO DO TITULO **************************
    ****************************************************************************/
 
-
   /*****************************************************************************
    ********************** IMPRESSÃO DAS LINHAS INICIAIS DA ACADEMIA  ***********
-    ****************************************************************************/
-  for (i = 0; i < qtosClientesArrived; i++)
-    {
-      printf("     ");
-    }
+   ****************************************************************************/
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+  {
+    printf("     ");
+  }
 
-    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-      * outros momentos da academia.
-      */
-    if (qtosClientesArrived == 0)
-    {
-      printf("     ");
-    }
+  /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+   * outros momentos da academia.
+   */
+  if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+  {
+    printf("     ");
+  }
   printf(" ");
-    for (i = 0; i < N_CADEIRAS; i++)
-      {
-        printf("______");
-      }
-      printf("__________________________\n");
+  for (i = 0; i < N_CADEIRAS; i++)
+  {
+    printf("______");
+  }
+  printf("__________________________\n");
 
-      for (i = 0; i < qtosClientesArrived; i++)
-    {
-      printf("     ");
-    }
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+  {
+    printf("     ");
+  }
 
-    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-      * outros momentos da academia.
-      */
-    if (qtosClientesArrived == 0)
-    {
-      printf("     ");
-    }
+  /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+   * outros momentos da academia.
+   */
+  if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+  {
+    printf("     ");
+  }
   printf("/");
-    for (i = 0; i < N_CADEIRAS; i++)
-    {
-      printf("      ");
-    }
-    printf("                          \\\n");
+  for (i = 0; i < N_CADEIRAS; i++)
+  {
+    printf("      ");
+  }
+  printf("                          \\\n");
 
   /*****************************************************************************
    ************************FIM DA IMPRESSÃO DAS LINHAS INICIAIS DA ACADEMIA  ***
@@ -224,34 +228,41 @@ void imprimedAcademia()
     /*****************************************************************************
      ************************** IMPRESSAO PRIMEIRA LINHA DA ITERAÇÃO *************
      ****************************************************************************/
-          for (i = 0; i < qtosClientesArrived; i++)
-      {
-        printf("     ");
-      }
-
-      /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-       * outros momentos da academia.
-       */
-      if (qtosClientesArrived == 0)
-      {
-        printf("     ");
-      }
-      printf("|");
-      for (i = 0; i < N_CADEIRAS; i++)
-      {
-        printf("      ");
-      }
-      printf("                          |\n");
-
-    for (i = 0; i < qtosClientesArrived; i++)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
     {
-      printf(" ... ");
+      printf("     ");
     }
 
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (qtosClientesArrived == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+    {
+      printf("     ");
+    }
+    printf("|");
+    for (i = 0; i < N_CADEIRAS; i++)
+    {
+      printf("      ");
+    }
+    printf("                          |\n");
+
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+    {
+      if (k == 0 && i < qtosClientesArrived)
+      {
+        printf(" ... ");
+      }
+      else
+      {
+        printf("     ");
+      }
+    }
+
+    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+     * outros momentos da academia.
+     */
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
     {
       printf("     ");
     }
@@ -294,15 +305,22 @@ void imprimedAcademia()
      ************************** IMPRESSAO SEGUNDA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
-    for (i = 0; i < qtosClientesArrived; i++)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
     {
-      printf(" %2d  ", clientesArrived[i]);
+      if (k == 0 && i < qtosClientesArrived)
+      {
+        printf(" %2d  ", clientesArrived[i]);
+      }
+      else
+      {
+        printf("     ");
+      }
     }
 
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (qtosClientesArrived == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
     {
       printf("     ");
     }
@@ -355,7 +373,7 @@ void imprimedAcademia()
      ************************* IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
-    for (i = 0; i < qtosClientesArrived; i++)
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -363,7 +381,7 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (qtosClientesArrived == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
     {
       printf("     ");
     }
@@ -379,35 +397,8 @@ void imprimedAcademia()
 
     printf(" E%02d           ", k);
 
-
-      printf("| \n");
-      for (i = 0; i < qtosClientesArrived; i++)
-      {
-        printf("     ");
-      }
-
-      /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-       * outros momentos da academia.
-       */
-      if (qtosClientesArrived == 0)
-      {
-        printf("     ");
-      }
-      printf("|");
-      for (i = 0; i < N_CADEIRAS; i++)
-      {
-        printf("      ");
-      }
-      printf("                          |\n");
-
-    /*****************************************************************************
-     ********************** FIM DA IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **********
-     ****************************************************************************/
-    /*****************************************************************************
-     ********************** IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO ************
-     ****************************************************************************/
-    for(int j = 0; j < 4; j++){
-      for (i = 0; i < qtosClientesArrived; i++)
+    printf("| \n");
+    for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
     {
       printf("     ");
     }
@@ -415,37 +406,26 @@ void imprimedAcademia()
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
      * outros momentos da academia.
      */
-    if (qtosClientesArrived == 0)
+    if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
     {
       printf("     ");
     }
-
-    printf("| ");
-
-    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    printf("|");
+    for (i = 0; i < N_CADEIRAS; i++)
     {
-      if(estadoCadeiraCliente[k][i] == B)
-        printf(" %s ", pessoa[j]);
-      else {
-        printf("      ");
-      }
+      printf("      ");
     }
+    printf("                          |\n");
 
-    printf("    ");
-
-    printf(" %s ", equipamentos[k%3][j]);
-
-
-      printf("| \n");
-    }
     /*****************************************************************************
-     ********************** FIM DA IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO *****
+     ********************** FIM DA IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **********
      ****************************************************************************/
-  }
     /*****************************************************************************
-     ********************** IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ****************
+     ********************** IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO ************
      ****************************************************************************/
-    for (i = 0; i < qtosClientesArrived; i++)
+    for (int j = 0; j < 4; j++)
+    {
+      for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
       {
         printf("     ");
       }
@@ -453,22 +433,58 @@ void imprimedAcademia()
       /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
        * outros momentos da academia.
        */
-      if (qtosClientesArrived == 0)
+      if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
       {
         printf("     ");
       }
-    printf("\\");
-      for (i = 0; i < N_CADEIRAS; i++)
+
+      printf("| ");
+
+      for (i = N_CADEIRAS - 1; i >= 0; i--)
       {
-        printf("______");
+        if (estadoCadeiraCliente[k][i] == B)
+          printf(" %s ", pessoa[j]);
+        else
+        {
+          printf("      ");
+        }
       }
-      printf("__________________________/\n");
 
+      printf("    ");
+
+      printf(" %s ", equipamentos[k % 3][j]);
+
+      printf("| \n");
+    }
     /*****************************************************************************
-     ********************** fFIM DA IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ********
+     ********************** FIM DA IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO *****
      ****************************************************************************/
+  }
+  /*****************************************************************************
+   ********************** IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ****************
+   ****************************************************************************/
+  for (i = N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) - 1; i >= 0; i--)
+  {
+    printf("     ");
+  }
 
+  /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+   * outros momentos da academia.
+   */
+  if (N_CLIENTES - (N_EQUIPAMENTOS * N_CADEIRAS) == 0)
+  {
+    printf("     ");
+  }
+  printf("\\");
+  for (i = 0; i < N_CADEIRAS; i++)
+  {
+    printf("______");
+  }
+  printf("__________________________/\n");
 
+  /*****************************************************************************
+   ********************** FIM DA IMPRESSÃO DA LINHA FINAL DA ACADEMIA  *********
+   ****************************************************************************/
 
   return;
 }
@@ -509,109 +525,110 @@ void *f_cliente(void *v)
   estadoC[id] = A;
 
   /* Imprime que o cliente chegou na academia. */
-  imprimedAcademia();
+  imprimeAcademia();
   sem_post(&sem_estados);
 
-  for (j = 0; j < N_EQUIPAMENTOS; j++)
+  while (estadoC[id] == A)
   {
-    if (sem_trywait(&sem_cadeiras[j]) == 0)
+    for (j = 0; j < N_EQUIPAMENTOS; j++)
     {
-      /* Cliente entrou na academia e sentou em uma cadeira. */
-      sem_wait(&sem_estados);
-      estadoC[id] = W;
-
-      /* Aloca uma cadeira para o cliente. */
-      sem_wait(&sem_fila_mexendo[j]);
-      for (i = 0; i < N_CADEIRAS; i++)
+      if (sem_trywait(&sem_cadeiras[j]) == 0)
       {
-        if (estadoCadeiraCliente[j][i] == F)
+        /* Cliente entrou na academia e sentou em uma cadeira. */
+        sem_wait(&sem_estados);
+        estadoC[id] = W;
+
+        /* Aloca uma cadeira para o cliente. */
+        sem_wait(&sem_fila_mexendo[j]);
+        for (i = 0; i < N_CADEIRAS; i++)
         {
-          estadoCadeiraCliente[j][i] = B;
-          clientesCadeira[j][i] = id;
+          if (estadoCadeiraCliente[j][i] == F)
+          {
+            estadoCadeiraCliente[j][i] = B;
+            clientesCadeira[j][i] = id;
 
-          minhaCadeiraCliente = i;
-          meuEquipamento = j;
+            minhaCadeiraCliente = i;
+            meuEquipamento = j;
 
-          break;
+            break;
+          }
         }
-      }
-      sem_post(&sem_fila_mexendo[j]);
+        sem_post(&sem_fila_mexendo[j]);
 
-      /* Imprime que o cliente esta esperando na academia. */
-      imprimedAcademia();
-      sem_post(&sem_estados);
+        /* Imprime que o cliente esta esperando na academia. */
+        imprimeAcademia();
+        sem_post(&sem_estados);
 
-      /* Cliente espera o visor mostrar um equipamento livre. */
-      while (minhaCadeiraCliente != 0)
-      {
-        if (estadoCadeiraCliente[j][minhaCadeiraCliente - 1] == F)
+        /* Cliente espera o visor mostrar um equipamento livre. */
+        while (minhaCadeiraCliente != 0)
         {
-          sem_wait(&sem_estados);
-          sem_wait(&sem_fila_mexendo[j]);
-          estadoCadeiraCliente[j][minhaCadeiraCliente] = F;
-          estadoCadeiraCliente[j][minhaCadeiraCliente - 1] = B;
-          clientesCadeira[j][minhaCadeiraCliente - 1] = id;
-          minhaCadeiraCliente--;
-          sem_post(&sem_fila_mexendo[j]);
-          imprimedAcademia();
-          sem_post(&sem_estados);
-          
+          if (estadoCadeiraCliente[j][minhaCadeiraCliente - 1] == F)
+          {
+            sem_wait(&sem_estados);
+            sem_wait(&sem_fila_mexendo[j]);
+            estadoCadeiraCliente[j][minhaCadeiraCliente] = F;
+            estadoCadeiraCliente[j][minhaCadeiraCliente - 1] = B;
+            clientesCadeira[j][minhaCadeiraCliente - 1] = id;
+            minhaCadeiraCliente--;
+            sem_post(&sem_fila_mexendo[j]);
+            imprimeAcademia();
+            sem_post(&sem_estados);
+          }
         }
+        sem_wait(&sem_le_visor[j]);
+        minha_cadeira = visor[j];
+        /* Permite que um outro equipamento escreva no visor. */
+        sem_post(&sem_escreve_visor[j]);
+        /* Espera cadeira do equipamento ficar livre para sentar. */
+        sem_wait(&sem_cad_equipamento[minha_cadeira]);
+
+        sem_post(&sem_cliente_cadeira[minha_cadeira]);
+
+        sem_wait(&sem_estados);
+
+        /* Libera a cadeira que estava sentado para um novo cliente que chegar. */
+        sem_post(&sem_cadeiras[j]);
+
+        /* Altera os estados para fazer o exercício. */
+        estadoC[id] = FC;
+        estadoB[minha_cadeira] = FB;
+
+        /* Guarda que o cliente esta na cadeira do equipamento indicada por
+         * minha_cadeira.
+         */
+        clientesEquipamento[minha_cadeira] = id;
+
+        estadoCadeiraCliente[meuEquipamento][minhaCadeiraCliente] = F;
+
+        /* Imprime que o cliente vai fazer o exercício. */
+        imprimeAcademia();
+        sem_post(&sem_estados);
+
+        /* Termino de alterar e imprimir a academia. */
+
+        sem_wait(&sem_exercicio_feito[minha_cadeira]);
+
+        sem_wait(&sem_estados);
+        estadoB[minha_cadeira] = S;
+        imprimeAcademia();
+
+        sem_post(&sem_cad_equipamento[minha_cadeira]);
+        sem_post(&sem_estados);
+
+        
       }
-      sem_wait(&sem_le_visor[j]);
-      minha_cadeira = visor[j];
-      /* Permite que um outro equipamento escreva no visor. */
-      sem_post(&sem_escreve_visor[j]);
-      /* Espera cadeira do equipamento ficar livre para sentar. */
-      sem_wait(&sem_cad_equipamento[minha_cadeira]);
-
-      sem_post(&sem_cliente_cadeira[minha_cadeira]);
-
-      sem_wait(&sem_estados);
-
-      /* Libera a cadeira que estava sentado para um novo cliente que chegar. */
-      sem_post(&sem_cadeiras[j]);
-
-      /* Altera os estados para fazer o exercício. */
-      estadoC[id] = FC;
-      estadoB[minha_cadeira] = FB;
-
-      /* Guarda que o cliente esta na cadeira do equipamento indicada por
-       * minha_cadeira.
-       */
-      clientesEquipamento[minha_cadeira] = id;
-
-      estadoCadeiraCliente[meuEquipamento][minhaCadeiraCliente] = F;
-
-      /* Imprime que o cliente vai fazer o exercício. */
-      imprimedAcademia();
-      sem_post(&sem_estados);
-
-      /* Termino de alterar e imprimir a academia. */
-
-      sem_wait(&sem_exercicio_feito[minha_cadeira]);
-
-      sem_wait(&sem_estados);
-      /* Cliente sai da academia. */
-      estadoC[id] = E;
-      estadoB[minha_cadeira] = S;
-
-      /* Imprime que o cliente saiu da academia. */
-      imprimedAcademia();
-
-      sem_post(&sem_cad_equipamento[minha_cadeira]);
-
-      /* Altera o estado pois o cliente vai embora. */
-      estadoC[id] = L;
-      sem_post(&sem_estados);
     }
-    else
-    {
-      /* Cliente desistiu de fazer os exercícios. */
-      sem_wait(&sem_estados);
-      estadoC[id] = L;
-      sem_post(&sem_estados);
-    }
+        sem_wait(&sem_estados);
+        /* Cliente sai da academia. */
+        estadoC[id] = E;
+        
+
+        /* Imprime que o cliente saiu da academia. */
+        imprimeAcademia();
+
+        /* Altera o estado pois o cliente vai embora. */
+        estadoC[id] = L;
+        sem_post(&sem_estados);
   }
 
   return NULL;
