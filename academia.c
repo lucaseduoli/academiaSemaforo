@@ -516,8 +516,7 @@ void *f_cliente(void *v)
   sem_post(&sem_estados);
 
 
-  imprimedAcademia();
-
+  // Executa para todos os equipamentos, para que o cliente entre nos equipamentos seguidos
   for (j = 0; j < N_EQUIPAMENTOS; j++)
   {
     if (sem_trywait(&sem_filas[j]) == 0)
@@ -547,7 +546,7 @@ void *f_cliente(void *v)
       imprimedAcademia();
       sem_post(&sem_estados);
 
-      /* Cliente espera o visor mostrar um equipamento livre. */
+      /* Cliente espera a fila seguinte ficar livre para entrar no lugar. */
       while (minhaFilaCliente != 0)
       {
         if (estadoFilaCliente[j][minhaFilaCliente - 1] == F)
@@ -564,13 +563,17 @@ void *f_cliente(void *v)
           
         }
       }
+
+      /* Espera o visor mostrar que o equipamento está livre. */
       sem_wait(&sem_le_visor[j]);
       minha_fila = visor[j];
       /* Permite que um outro equipamento escreva no visor. */
       sem_post(&sem_escreve_visor[j]);
+
       /* Espera fila do equipamento ficar livre para sentar. */
       sem_wait(&sem_fila_equipamento[minha_fila]);
 
+      /* Diz para equipamento que cliente entrou. */
       sem_post(&sem_cliente_fila[minha_fila]);
 
       sem_wait(&sem_estados);
@@ -634,10 +637,10 @@ int main()
     sem_init(&sem_escreve_visor[i], 0, 1);     // inicia o semáforo de escrever no visor
     sem_init(&sem_le_visor[i], 0, 0);          // inicia o semáforo de ler no visor
     sem_init(&sem_filas[i], 0, N_FILAS); // inicia o semáforo das filas
-    sem_init(&sem_fila_equipamento[i], 0, 1); // inicia o sem
-    sem_init(&sem_cliente_fila[i], 0, 0);
-    sem_init(&sem_exercicio_feito[i], 0, 0);
-    sem_init(&sem_fila_mexendo[i], 0, 1);
+    sem_init(&sem_fila_equipamento[i], 0, 1); // inicia o semáforo da fila do equipamento
+    sem_init(&sem_cliente_fila[i], 0, 0);     // inicia o semáforo da fila para entrar no equipamento
+    sem_init(&sem_exercicio_feito[i], 0, 0);  // inicia o semáforo para avisar o cliente do exercício já feito
+    sem_init(&sem_fila_mexendo[i], 0, 1);     // inicia o semáforo para não deixar mexerem na fila enquanto alguem esta entrando
 
     sem_wait(&sem_estados);
     estadoE[i] = S; // sleeping
