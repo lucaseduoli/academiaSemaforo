@@ -1,12 +1,39 @@
-/*
- * Problema do equipamento dorminhoco com vÃ¡rios equipamentos.
- */
+/****************************************************************************
+ * File name:        academia.c
+ * File description: O arquivo serve o projeto MultiThread da disciplina 
+ *		     MC504 ministrada no primeiro semestre de 2023.
+ *                   O intuito principal e'desenvolvimento multithread com
+ *                   sincronizacao por sema'foros, contendo duas threads 
+ *                   f_equipamento e f_cliente (cada uma com mais de uma
+ *                   instancia).
+ * Author name:   Giovanna Gennari
+ *                Lucas Oliveira
+ *                Borges   
+ *                Rafael Ifanger
+ * Creation date:  05/21/2023     
+ * Revision date:     
+ ****************************************************************************/
 
-/*****************************************************************
- *  Cineminha desenvolvido por:                                  *
- *     Danilo Silva Marshall (EC05 - UNICAMP)           RA042865 *
- *     Erika Regina Campos de Almeida (EC05 - UNICAMP)  RA043217 *
- ****************************************************************/
+/****************************************************************************
+ * Function name:        imprimeAcademia
+ * Function description: Visualizacao do processamento das threads no terminal
+ * Input parameters:     none
+ * Output parameters:    none
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function name:        f_equipamento
+ * Function description: Thread que simboliza o equipamento
+ * Input parameters:     void pointer (id do equipamento)
+ * Output parameters:    void pointer
+ ****************************************************************************/
+
+/****************************************************************************
+ * Function name:        f_cliente
+ * Function description: Thread que simboliza o cliente
+ * Input parameters:     void pointer (id do cliente)
+ * Output parameters:    void pointer
+ ****************************************************************************/
 
 #include <pthread.h>
 #include <semaphore.h>
@@ -75,8 +102,21 @@ sem_t sem_estados; /* Semaforo para troca de estados. */
 
 int visor[N_EQUIPAMENTOS];
 
-/* Funcao responsavel pela impressao do cineminha. */
-void imprimeCineminha()
+char equipamentos[3][4][21] = {
+  {{"             /\\    "}, {"  __________/ /    "}, {" /__________\\/     "}, {"//         //      "},},
+  {{"   _          _    "}, {"  |_|        |_|   "}, {" _//        _//    "}, {"|_|        |_|     "}},
+  {{"                   "}, {"  ______________   "}, {" /__________\\___\\  "}, {"//         //      "}},
+};
+
+char pessoa[4][5] = {
+  {"  _ "},
+  {" |_|"},
+  {" /|\\"},
+  {" / \\"},
+};
+
+/* Funcao responsavel pela impressao da academia. */
+void imprimedAcademia()
 {
   int i, j, qtosClientesArrived = 0, qtosClientesExit = 0, titulo = 0;
 
@@ -105,19 +145,20 @@ void imprimeCineminha()
    ****************************************************************************/
 
   /* Imprime os espacos em branco da parte referente aos clientes Arrived. */
+  printf("\n");
   for (i = 0; i < qtosClientesArrived; i++)
   {
     printf("     ");
   }
 
-  /* Faz a conta para imprimir o tÃ­tulo 'BARBEARIA' no meio. */
+  /* Faz a conta para imprimir o tí­tulo 'ACADEMIA' no meio. */
 
   if (qtosClientesArrived == 0)
   {
     printf("     ");
   }
 
-  titulo = (4 + 5 * N_CADEIRAS + 10) / 2;
+  titulo = (4 + 6 * N_CADEIRAS +27) / 2;
 
   titulo -= 5;
 
@@ -132,11 +173,75 @@ void imprimeCineminha()
    ************************** FIM IMPRESSAO DO TITULO **************************
    ****************************************************************************/
 
+
+  /*****************************************************************************
+   ********************** IMPRESSÃO DAS LINHAS INICIAIS DA ACADEMIA  ***********
+    ****************************************************************************/
+  for (i = 0; i < qtosClientesArrived; i++)
+    {
+      printf("     ");
+    }
+
+    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+      * outros momentos da academia.
+      */
+    if (qtosClientesArrived == 0)
+    {
+      printf("     ");
+    }
+  printf(" ");
+    for (i = 0; i < N_CADEIRAS; i++)
+      {
+        printf("______");
+      }
+      printf("__________________________\n");
+
+      for (i = 0; i < qtosClientesArrived; i++)
+    {
+      printf("     ");
+    }
+
+    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+      * outros momentos da academia.
+      */
+    if (qtosClientesArrived == 0)
+    {
+      printf("     ");
+    }
+  printf("/");
+    for (i = 0; i < N_CADEIRAS; i++)
+    {
+      printf("      ");
+    }
+    printf("                          \\\n");
+
+  /*****************************************************************************
+   ************************FIM DA IMPRESSÃO DAS LINHAS INICIAIS DA ACADEMIA  ***
+   ****************************************************************************/
+
   for (int k = 0; k < N_EQUIPAMENTOS; k++)
   {
     /*****************************************************************************
-     ************************** IMPRESSAO PRIMEIRA LINHA *************************
+     ************************** IMPRESSAO PRIMEIRA LINHA DA ITERAÇÃO *************
      ****************************************************************************/
+          for (i = 0; i < qtosClientesArrived; i++)
+      {
+        printf("     ");
+      }
+
+      /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+       * outros momentos da academia.
+       */
+      if (qtosClientesArrived == 0)
+      {
+        printf("     ");
+      }
+      printf("|");
+      for (i = 0; i < N_CADEIRAS; i++)
+      {
+        printf("      ");
+      }
+      printf("                          |\n");
 
     for (i = 0; i < qtosClientesArrived; i++)
     {
@@ -144,28 +249,25 @@ void imprimeCineminha()
     }
 
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-     * outros momentos do cineminha.
+     * outros momentos da academia.
      */
     if (qtosClientesArrived == 0)
     {
       printf("     ");
     }
 
-    if (k == 0)
-      printf("/ ");
-    else
-      printf("| ");
+    printf("| ");
 
     /* Imprimi as cadeiras dos clientes. */
     for (i = N_CADEIRAS - 1; i >= 0; i--)
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
-        printf(" ... ");
+        printf("  ... ");
       }
       else
       {
-        printf("     ");
+        printf("      ");
       }
     }
 
@@ -175,24 +277,21 @@ void imprimeCineminha()
     switch (estadoB[k])
     {
     case FB:
-      printf(" ... ");
+      printf("       ... ");
       break;
     case S:
-      printf(" zzz ");
+      printf("       zzz ");
       break;
     }
 
-    if (k == 0)
-      printf("\\ \n");
-    else
-      printf("| \n");
+    printf("          | \n");
 
     /*****************************************************************************
-     ********************** FIM DA IMPRESSAO PRIMEIRA LINHA **********************
+     ********************** FIM DA IMPRESSAO PRIMEIRA LINHA DA ITERAÇÃO **********
      ****************************************************************************/
 
     /*****************************************************************************
-     ************************** IMPRESSAO SEGUNDA LINHA **************************
+     ************************** IMPRESSAO SEGUNDA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
     for (i = 0; i < qtosClientesArrived; i++)
@@ -201,7 +300,7 @@ void imprimeCineminha()
     }
 
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-     * outros momentos do cineminha.
+     * outros momentos da academia.
      */
     if (qtosClientesArrived == 0)
     {
@@ -214,11 +313,11 @@ void imprimeCineminha()
     {
       if (estadoCadeiraCliente[k][i] == B)
       {
-        printf(" %2d  ", clientesCadeira[k][i]);
+        printf("  %2d  ", clientesCadeira[k][i]);
       }
       else
       {
-        printf("     ");
+        printf("      ");
       }
     }
 
@@ -229,14 +328,14 @@ void imprimeCineminha()
     switch (estadoB[k])
     {
     case FB:
-      printf(" %2d  ", clientesEquipamento[k]);
+      printf("       %2d  ", clientesEquipamento[k]);
       break;
     case S:
-      printf("     ");
+      printf("           ");
       break;
     }
 
-    printf("| ");
+    printf("          | ");
 
     if (k == N_EQUIPAMENTOS - 1)
     {
@@ -249,11 +348,11 @@ void imprimeCineminha()
     printf("\n");
 
     /*****************************************************************************
-     ********************** FIM DA IMPRESSAO SEGUNDA LINHA ***********************
+     ********************** FIM DA IMPRESSAO SEGUNDA LINHA DA ITERAÇÃO ***********
      ****************************************************************************/
 
     /*****************************************************************************
-     ************************* IMPRESSAO TERCEIRA LINHA **************************
+     ************************* IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **************
      ****************************************************************************/
 
     for (i = 0; i < qtosClientesArrived; i++)
@@ -262,31 +361,25 @@ void imprimeCineminha()
     }
 
     /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-     * outros momentos do cineminha.
+     * outros momentos da academia.
      */
     if (qtosClientesArrived == 0)
     {
       printf("     ");
     }
 
-    if (k == N_EQUIPAMENTOS - 1)
-      printf("\\ ");
-    else
-      printf("| ");
+    printf("| ");
 
     for (i = N_CADEIRAS - 1; i >= 0; i--)
     {
-      printf(" F%02d ", i);
+      printf("  F%02d ", i);
     }
 
-    printf("    ");
+    printf("          ");
 
-    printf(" E%02d ", k);
+    printf(" E%02d           ", k);
 
-    if (k == N_EQUIPAMENTOS - 1)
-      printf("/ \n\n");
-    else
-    {
+
       printf("| \n");
       for (i = 0; i < qtosClientesArrived; i++)
       {
@@ -294,7 +387,7 @@ void imprimeCineminha()
       }
 
       /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
-       * outros momentos do cineminha.
+       * outros momentos da academia.
        */
       if (qtosClientesArrived == 0)
       {
@@ -303,15 +396,79 @@ void imprimeCineminha()
       printf("|");
       for (i = 0; i < N_CADEIRAS; i++)
       {
-        printf("     ");
+        printf("      ");
       }
-      printf("          |\n");
-    }
+      printf("                          |\n");
 
     /*****************************************************************************
-     ********************** FIM DA IMPRESSAO TERCEIRA LINHA **********************
+     ********************** FIM DA IMPRESSAO TERCEIRA LINHA DA ITERAÇÃO **********
+     ****************************************************************************/
+    /*****************************************************************************
+     ********************** IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO ************
+     ****************************************************************************/
+    for(int j = 0; j < 4; j++){
+      for (i = 0; i < qtosClientesArrived; i++)
+    {
+      printf("     ");
+    }
+
+    /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+     * outros momentos da academia.
+     */
+    if (qtosClientesArrived == 0)
+    {
+      printf("     ");
+    }
+
+    printf("| ");
+
+    for (i = N_CADEIRAS - 1; i >= 0; i--)
+    {
+      if(estadoCadeiraCliente[k][i] == B)
+        printf(" %s ", pessoa[j]);
+      else {
+        printf("      ");
+      }
+    }
+
+    printf("    ");
+
+    printf(" %s ", equipamentos[k%3][j]);
+
+
+      printf("| \n");
+    }
+    /*****************************************************************************
+     ********************** FIM DA IMPRESSÃO DAS LINHAS DE ASCII DA ITERAÇÃO *****
      ****************************************************************************/
   }
+    /*****************************************************************************
+     ********************** IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ****************
+     ****************************************************************************/
+    for (i = 0; i < qtosClientesArrived; i++)
+      {
+        printf("     ");
+      }
+
+      /* Se nao chegou clientes, imprimimos espacamento para ficar alinhado com
+       * outros momentos da academia.
+       */
+      if (qtosClientesArrived == 0)
+      {
+        printf("     ");
+      }
+    printf("\\");
+      for (i = 0; i < N_CADEIRAS; i++)
+      {
+        printf("______");
+      }
+      printf("__________________________/\n");
+
+    /*****************************************************************************
+     ********************** fFIM DA IMPRESSÃO DA LINHA FINAL DA ACADEMIA  ********
+     ****************************************************************************/
+
+
 
   return;
 }
@@ -327,7 +484,7 @@ void *f_equipamento(void *v)
     visor[id] = id;
     sem_post(&sem_le_visor[id]);
 
-    /* Para o corte nao ser imediato.*/
+    /* Para o exercício nao ser imediato.*/
     sleep(1);
 
     sem_wait(&sem_cliente_cadeira[id]);
@@ -352,7 +509,7 @@ void *f_cliente(void *v)
   estadoC[id] = A;
 
   /* Imprime que o cliente chegou na academia. */
-  imprimeCineminha();
+  imprimedAcademia();
   sem_post(&sem_estados);
 
   for (j = 0; j < N_EQUIPAMENTOS; j++)
@@ -381,7 +538,7 @@ void *f_cliente(void *v)
       sem_post(&sem_fila_mexendo[j]);
 
       /* Imprime que o cliente esta esperando na academia. */
-      imprimeCineminha();
+      imprimedAcademia();
       sem_post(&sem_estados);
 
       /* Cliente espera o visor mostrar um equipamento livre. */
@@ -396,7 +553,7 @@ void *f_cliente(void *v)
           clientesCadeira[j][minhaCadeiraCliente - 1] = id;
           minhaCadeiraCliente--;
           sem_post(&sem_fila_mexendo[j]);
-          imprimeCineminha();
+          imprimedAcademia();
           sem_post(&sem_estados);
           
         }
@@ -415,7 +572,7 @@ void *f_cliente(void *v)
       /* Libera a cadeira que estava sentado para um novo cliente que chegar. */
       sem_post(&sem_cadeiras[j]);
 
-      /* Altera os estados para cortar o cabelo. */
+      /* Altera os estados para fazer o exercício. */
       estadoC[id] = FC;
       estadoB[minha_cadeira] = FB;
 
@@ -426,11 +583,11 @@ void *f_cliente(void *v)
 
       estadoCadeiraCliente[meuEquipamento][minhaCadeiraCliente] = F;
 
-      /* Imprime que o equipamento vai cortar o cabelo. */
-      imprimeCineminha();
+      /* Imprime que o cliente vai fazer o exercício. */
+      imprimedAcademia();
       sem_post(&sem_estados);
 
-      /* Termino de alterar e imprimir o cineminha. */
+      /* Termino de alterar e imprimir a academia. */
 
       sem_wait(&sem_exercicio_feito[minha_cadeira]);
 
@@ -440,7 +597,7 @@ void *f_cliente(void *v)
       estadoB[minha_cadeira] = S;
 
       /* Imprime que o cliente saiu da academia. */
-      imprimeCineminha();
+      imprimedAcademia();
 
       sem_post(&sem_cad_equipamento[minha_cadeira]);
 
@@ -450,7 +607,7 @@ void *f_cliente(void *v)
     }
     else
     {
-      /* Cliente desistiu de cortar o cabelo. */
+      /* Cliente desistiu de fazer os exercícios. */
       sem_wait(&sem_estados);
       estadoC[id] = L;
       sem_post(&sem_estados);
